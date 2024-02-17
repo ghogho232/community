@@ -1,15 +1,9 @@
 const express = require('express');
 const app = express();
+var template = require('./template');
+var router = require('./routes');
 
-app.get('/', (req, res) => {
-    res.send('Hello, world!');
-});
-
-app.get('/user', (req, res) => {
-    const queryData = req.query;
-    console.log(queryData);
-    res.send('Received query data');
-});
+app.use('/',router);
 
 app.listen(3300, () => {
     console.log('Server is running on port 3300');
