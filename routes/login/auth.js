@@ -35,8 +35,7 @@ router.post('/login_process', function(req,res){
                     res.redirect('/');
                 });
             } else{
-                res.send(`<script type="text/javascript">alert("로그인 정보가 일치하지 않습니다."); 
-                            document.location.href="/auth/login";</script>`);    
+                res.send('wrong data');    
             }
         });        
     }
