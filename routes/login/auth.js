@@ -4,10 +4,16 @@ var db = require('../../db');
 var template = require('../../lib/template');
 var auth = require('../../lib/auth_check');
 
+function addErr(add, html){
+    return add + html;
+}
+
 router.get('/login', function(req,res){
     var title = "로그인";
     var html = 
-        `<h2>로그인</h2>
+        `
+        <h1><a href ="/">홈</a></h1>
+        <h2>로그인</h2>
         <form action="/auth/login_process" method="post">
         <p><input type="text" name="user_id" placeholder="아이디"></p>
         <p><input type="password" name="password" placeholder="비밀번호"></p>
@@ -17,10 +23,10 @@ router.get('/login', function(req,res){
     res.send(html);
 });
 
-router.post('/login_process', function(req,res){
-    var post = req.body;
-    var id = post.user_id;
-    var password = post.password;
+router.post('/login_process', async function(req,res){
+    var post = await req.body;
+    var id = await post.user_id;
+    var password = await post.password;
     console.log(post);
     if(id && password){
         db.query(`SELECT * FROM user WHERE user_id = ? AND password = ?`,[id,password],function(err,results){
@@ -37,10 +43,13 @@ router.post('/login_process', function(req,res){
                 res.send('wrong data');    
             }
         });        
+    } else{
+        res.redirect('/auth/login');
     }
 });
 var title = "회원가입";
-var html = template.HTML(title,'',`
+var html = `
+    <h1><a href ="/">홈</a></h1>
     <h2>회원가입</h2>
     <form action="/auth/register_process" method="post">
     <p><input type="text" name="user_id" placeholder="아이디">
@@ -51,7 +60,7 @@ var html = template.HTML(title,'',`
     <p><input type="text" name="name" placeholder="닉네임">
     <p><input type="submit" value="로그인"><p>
     </form>
-`, '');
+`;
 router.get('/register',function(req,res){
     res.send(html);
 });
@@ -88,6 +97,9 @@ router.post('/register_process', function(req,res){
                 res.send(html+`비밀번호가 일치하지 않습니다.`);
             }
         });
+    }
+    else{
+        res.redirect('/auth/register');
     }
 });
 
