@@ -7,3 +7,11 @@ table {
     border: 1px solid black;
     border-collapse: collapse;
   }
+
+.post {
+    display: flex;
+    align-items: center; /* 가운데 정렬 */
+}
+.post h2 {
+    margin-right: 20px; /* 제목과 작성자 사이 간격 조절 */
+}

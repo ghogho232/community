@@ -8,7 +8,7 @@ var db = require('../../db');
 app.use(express.static('public'));
 
 exports.main = (req, res) => {
-    var title = 'Community';
+    var title = 'Welcome';
     var description = 'this is web community';
 
     db.query(`SELECT * FROM post`, function (err, result, fields) {
@@ -16,6 +16,13 @@ exports.main = (req, res) => {
             throw err;
         }
         var posts = result; // 결과값 전체를 가져옴
-        template.list(title, description, posts, req, res);
+        var list = template.list(posts);
+        var html = template.HTML(title, list,
+            `<a href="/topic/create">create</a>`,
+            `<h2>${title}</h2>${description}<br>`,
+            auth.statusUI(req, res)
+        );
+    
+        res.send(html);
     });
 }
