@@ -4,10 +4,6 @@ var db = require('../../db');
 var template = require('../../lib/template');
 var auth = require('../../lib/auth_check');
 
-function addErr(add, html){
-    return add + html;
-}
-
 router.get('/login', function(req,res){
     var title = "로그인";
     var html = 
@@ -19,7 +15,8 @@ router.get('/login', function(req,res){
         <p><input type="password" name="password" placeholder="비밀번호"></p>
         <p><input type="submit" value="로그인"><p>
         </form>
-        <p><a href="/auth/register">회원가입</p>` 
+        <p><a href="/auth/register">회원가입</a></p>` 
+        
     res.send(html);
 });
 
@@ -35,10 +32,9 @@ router.post('/login_process', async function(req,res){
             }
             if(results.length>0){
                 console.log(results[0]);
-                req.session.is_logined = true;
-                req.session.nickname = results[0].name;
-                req.session.user_id = results[0].id;   
-                console.log("id=",req.session.user_id);      
+                req.session.is_logined = true; //로그인 여부
+                req.session.nickname = results[0].name; //유저 이름
+                req.session.user_id = results[0].id;   //유저 아이디    
                 req.session.save(function(){
                     res.redirect('/');
                 });
@@ -46,8 +42,10 @@ router.post('/login_process', async function(req,res){
                 res.send('wrong data');    
             }
         });        
-    } else{
-        res.redirect('/auth/login');
+    } else if(!id){
+        //아이디를 입력하세요
+    } else if(!password){
+        //비밀번호를 입력하세요
     }
 });
 var title = "회원가입";
@@ -61,7 +59,7 @@ var html = `
     <p><input type="password" name="password" placeholder="비밀번호"></p>
     <p><input type="password" name="password_check" placeholder="비밀번호 확인"></p>
     <p><input type="text" name="name" placeholder="닉네임">
-    <p><input type="submit" value="로그인"><p>
+    <p><input type="submit" value="가입"><p>
     </form>
 `;
 router.get('/register',function(req,res){
@@ -90,7 +88,7 @@ router.post('/register_process', function(req,res){
                         throw err;
                     }                    
                     var home = template.HTML('','',
-                    name + `<h2>님 환영합니다!</h2>
+                    `<h2>${name}님 환영합니다!</h2>
                     <form action="/" method="get">
                         <p><input type="submit" value="홈으로">`
                     ,'','');

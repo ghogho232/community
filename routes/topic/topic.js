@@ -67,12 +67,22 @@ router.get('/:pageId', function(req, res, next){
           var sanitizedDescription = sanitizeHtml(post[0].contents, {
           allowedTags:['h1']
           });
+          var post_created = post[0].post_created;
+          var year = post_created.getFullYear();
+          var month = ('0' + (post_created.getMonth() + 1)).slice(-2);
+          var day = ('0' + post_created.getDate()).slice(-2);
+          var date = year + '-' + month  + '-' + day;
+
+          var hours = ('0' + post_created.getHours()).slice(-2); 
+          var minutes = ('0' + post_created.getMinutes()).slice(-2);
+          var time = hours + ':' + minutes; 
 
           if(!auth.isOwner(req,res)||auth.Owner(req,res)!=author_id){ //자신이 쓴 글이 아니면 글 제어 인터페이스 미출력
             db.query(`SELECT * FROM post`, function (err, result2, fields) {
               var list = template.list(result2);
               var html = template.HTML(sanitizedTitle, list,
               `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
+                ${date} ${time}
                <p>${sanitizedDescription}</p>`,
               `<a href="/topic/create">글쓰기</a>`,
                   auth.statusUI(req,res)
@@ -84,7 +94,9 @@ router.get('/:pageId', function(req, res, next){
             db.query(`SELECT * FROM post`, function (err, result2, fields) {
               var list = template.list(result2);
               var html = template.HTML(sanitizedTitle, list,
-              `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div><p>${sanitizedDescription}</p>`,
+              `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
+              ${date} ${time}
+              <p>${sanitizedDescription}</p>`,
               ` <a href="/topic/create">글쓰기</a>
                   <a href="/topic/update/${post[0].post_id}">수정</a>
                   <form action="/topic/delete_process" method="post">
