@@ -34,8 +34,11 @@ router.post('/login_process', async function(req,res){
                 throw err;
             }
             if(results.length>0){
+                console.log(results[0]);
                 req.session.is_logined = true;
-                req.session.nickname = results[0].name;         
+                req.session.nickname = results[0].name;
+                req.session.user_id = results[0].id;   
+                console.log("id=",req.session.user_id);      
                 req.session.save(function(){
                     res.redirect('/');
                 });
