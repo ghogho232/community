@@ -10,46 +10,80 @@ var auth = require('../../lib/auth_check');
 app.use(express.static('public'));
 
 router.get('/create', function(req,res){
-  if(!auth.isOwner(req,res)){
-    res.redirect('/');
-    return false;
+  if(!auth.isOwner(req,res)){ //익명 글 쓰기
+    var title = 'WEB - create';
+    var list = " ";
+    var html = template.HTML(title, list, `
+      <form action="/topic/anonym_create_process" method="post">
+        <p><input type="text" name="title" placeholder="title"></p>
+        <p><input type="text" name="name" placeholder="name">
+            <input type="password" name="password" placeholder="password"></p>
+        <p>
+          <textarea name="description" placeholder="description"></textarea>
+        </p>
+        <p>
+          <input type="submit">
+        </p>
+      </form>
+    `, '',auth.statusUI(req,res));
+    res.send(html);
   }
-  var title = 'WEB - create';
-  var list = " ";
-  var html = template.HTML(title, list, `
-    <form action="/topic/create_process" method="post">
-      <p><input type="text" name="title" placeholder="title"></p>
-      <p>
-        <textarea name="description" placeholder="description"></textarea>
-      </p>
-      <p>
-        <input type="submit">
-      </p>
-    </form>
-  `, '',auth.statusUI(req,res));
-  res.send(html);
+  else{ //로그인 글쓰기
+    var title = 'WEB - create';
+    var list = " ";
+    var html = template.HTML(title, list, `
+      <form action="/topic/create_process" method="post">
+        <p><input type="text" name="title" placeholder="title"></p>
+        <p>
+          <textarea name="description" placeholder="description"></textarea>
+        </p>
+        <p>
+          <input type="submit">
+        </p>
+      </form>
+    `, '',auth.statusUI(req,res));
+    res.send(html);  
+  }
 });
 
 router.post('/create_process', async function(req,res){
   var post = await req.body;
   var title = await post.title;
   var desc = await post.description;
-  var name = await req.session.nickname;
-
-  db.query(`SELECT id FROM user WHERE name = ?`,[name],function(err,result){
+  var nickname = await req.session.nickname;
+  
+  db.query(`SELECT id FROM user WHERE name = ?`,[nickname],function(err,result){
     if(err){
       throw err;
     }
     var user_id = result[0].id;
     console.log(user_id);
     db.query(`INSERT INTO post (title,contents,post_created,author_id,author_name) VALUES (?,?,?,?,?)`,
-            [title,desc,new Date(),user_id,name],function(err,results){
+            [title,desc,new Date(),user_id,nickname],function(err,results){
       if(err){
         throw err;
       }
       res.redirect('/');
     });
   });
+});
+
+router.post('/anonym_create_process', async function(req,res){ //익명 글쓰기
+  var post = await req.body;
+  var title = await post.title;
+  var desc = await post.description;
+  var name = await post.name;
+  var password = await post.password;
+  
+  var user_id = 0;
+  db.query(`INSERT INTO post (title,contents,post_created,author_id,author_name,post_password) VALUES (?,?,?,?,?,?)`,
+          [title,desc,new Date(),user_id,name,password],function(err,results){
+    if(err){
+      throw err;
+    }
+    res.redirect('/');
+  });
+  
 });
 
 router.get('/:pageId', function(req, res, next){
