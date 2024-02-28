@@ -6,15 +6,18 @@ var template = require('../../lib/template');
 var path = require('path');
 var sanitizeHtml = require('sanitize-html');
 var auth = require('../../lib/auth_check');
+var requestIp = require('request-ip');
 
 app.use(express.static('public'));
 
 router.get('/create', function(req,res){
   if(!auth.isOwner(req,res)){ //익명 글 쓰기
+    var ip = requestIp.getClientIp(req);
     var title = 'WEB - create';
     var list = " ";
     var html = template.HTML(title, list, `
       <form action="/topic/anonym_create_process" method="post">
+        <p><input type="hidden" name="ip" value="${ip}"></p>
         <p><input type="text" name="title" placeholder="title"></p>
         <p><input type="text" name="name" placeholder="name">
             <input type="password" name="password" placeholder="password"></p>
@@ -70,9 +73,13 @@ router.post('/create_process', async function(req,res){
 
 router.post('/anonym_create_process', async function(req,res){ //익명 글쓰기
   var post = await req.body;
+  var ip = await post.ip;
+  const IPIndex = ip.indexOf('.', ip.indexOf('.') + 1); //ip주소 줄이기
+  const result = ip.substring(0, IPIndex); //ip주소 두번째까지만 출력
   var title = await post.title;
   var desc = await post.description;
   var name = await post.name;
+  name += ' ('+result+')';
   var password = await post.password;
   
   var user_id = 0;

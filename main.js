@@ -35,4 +35,4 @@ app.use('/',router);
 app.use('/auth', authRouter);
 app.use('/topic', topicRouter);
 
-app.listen(3300, () => { console.log('Server is running on port 3300');});
+app.listen(3300, '0.0.0.0',() => { console.log('Server is running on port 3300');});
