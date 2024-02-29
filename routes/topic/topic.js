@@ -82,7 +82,7 @@ router.post('/anonym_create_process', async function(req,res){ //익명 글쓰�
   name += ' ('+result+')';
   var password = await post.password;
   
-  var user_id = 0;
+  var user_id = 1;
   db.query(`INSERT INTO post (title,contents,post_created,author_id,author_name,post_password) VALUES (?,?,?,?,?,?)`,
           [title,desc,new Date(),user_id,name,password],function(err,results){
     if(err){
@@ -104,6 +104,7 @@ router.get('/:pageId', function(req, res, next){
           var title = post[0].title;
           var author = post[0].author_name;
           var author_id = post[0].author_id;
+          console.log("아이디는" + author_id);
           var sanitizedTitle = sanitizeHtml(title);
           var sanitizedDescription = sanitizeHtml(post[0].contents, {
           allowedTags:['h1']
@@ -118,7 +119,28 @@ router.get('/:pageId', function(req, res, next){
           var minutes = ('0' + post_created.getMinutes()).slice(-2);
           var time = hours + ':' + minutes; 
 
-          if(!auth.isOwner(req,res)||auth.Owner(req,res)!=author_id){ //자신이 쓴 글이 아니면 글 제어 인터페이스 미출력
+          if(author_id===1){ //익명글 출력
+            console.log('익명');
+            db.query(`SELECT * FROM post`, function (err, result2, fields) {
+              var list = template.list(result2);
+              var html = template.HTML(sanitizedTitle, list,
+              `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
+              ${date} ${time}
+              <p>${sanitizedDescription}</p>`,
+              ` <a href="/topic/create">글쓰기</a>
+                  <a href="/topic/update_auth/${post[0].post_id}">수정</a>
+                  <form action="/topic/delete_auth" method="post">
+                    <input type="hidden" name="post_id" value="${filteredId}">
+                    <input type="hidden" name="title" value="${sanitizedTitle}">
+                    <input type="submit" value="삭제">
+                  </form>`,
+                  auth.statusUI(req,res)
+              );
+              res.send(html);  
+            });
+          }
+
+          else if(!auth.isOwner(req,res)||auth.Owner(req,res)!=author_id){ //자신이 쓴 글이 아니면 글 제어 인터페이스 미출력
             db.query(`SELECT * FROM post`, function (err, result2, fields) {
               var list = template.list(result2);
               var html = template.HTML(sanitizedTitle, list,
@@ -131,6 +153,7 @@ router.get('/:pageId', function(req, res, next){
               res.send(html);  
             });
           }
+          
           else{ //자신이 쓴 글이면 제어 가능
             db.query(`SELECT * FROM post`, function (err, result2, fields) {
               var list = template.list(result2);
@@ -151,6 +174,48 @@ router.get('/:pageId', function(req, res, next){
             });
           }         
       }
+  });
+});
+
+router.post('/delete_auth',function(req,res){
+  var post = req.body;
+  var post_id = post.post_id;
+  var html = template.HTML('', '',
+    ``,
+    ` 
+        <form action="/topic/delete_auth_process" method="post">
+          <p>삭제를 위해 비밀번호를 입력하시오</p>
+          <input type="hidden" name="post_id" value="${post_id}">
+          <input type="password" name="password" placeholder="비밀번호">
+          <input type="submit" value="확인">
+        </form>`,
+        ''
+    );
+    res.send(html);
+});
+
+// delete_process 핸들러는 비밀번호가 올바른지 확인합니다.
+router.post('/delete_auth_process',function(req,res){
+  var post = req.body;
+  var password = post.password;
+  var post_id = post.post_id;
+  db.query(`SELECT post_password FROM post WHERE post_id=?`,[post_id],function(err,result,fields){
+    if(err){
+      throw err;
+    }
+    if(result.length === 0 || password !== result[0].post_password){
+      // 비밀번호가 일치하지 않으면 게시물 페이지로 리디렉션
+      req.flash('error', '비밀번호가 틀렸습니다.');
+      res.redirect(`/topic/${post_id}`);
+    } else {
+      // 비밀번호가 일치하면 게시물 삭제
+      db.query(`DELETE FROM post WHERE post_id=?`,[post_id],function(err,result,fields){
+        if(err){
+          throw err;
+        }
+        res.redirect('/');
+      });
+    }
   });
 });
 

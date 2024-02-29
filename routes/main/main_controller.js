@@ -18,8 +18,8 @@ exports.main = (req, res) => {
         var posts = result; // 결과값 전체를 가져옴
         var list = template.list(posts);
         var html = template.HTML(title, list,
-            `<a href="/topic/create">create</a>`,
             `<h2>${title}</h2>${description}<br>`,
+            `<a href="/topic/create">글쓰기</a>`,
             auth.statusUI(req, res)
         );
     
