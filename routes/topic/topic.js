@@ -7,8 +7,10 @@ var path = require('path');
 var sanitizeHtml = require('sanitize-html');
 var auth = require('../../lib/auth_check');
 var requestIp = require('request-ip');
+const bodyParser = require('body-parser');
 
 app.use(express.static('public'));
+app.use(bodyParser.json());
 
 router.get('/create', function(req,res){
   if(!auth.isOwner(req,res)){ //익명 글 쓰기
@@ -177,47 +179,44 @@ router.get('/:pageId', function(req, res, next){
   });
 });
 
-router.post('/delete_auth',function(req,res){
+// delete_auth 라우팅은 비밀번호 입력 폼을 렌더링합니다.
+router.post('/delete_auth', function(req, res){
   var post = req.body;
   var post_id = post.post_id;
-  var html = template.HTML('', '',
-    ``,
-    ` 
-        <form action="/topic/delete_auth_process" method="post">
-          <p>삭제를 위해 비밀번호를 입력하시오</p>
-          <input type="hidden" name="post_id" value="${post_id}">
-          <input type="password" name="password" placeholder="비밀번호">
-          <input type="submit" value="확인">
-        </form>`,
-        ''
-    );
-    res.send(html);
+  res.render('delete_auth', { post_id: post_id });
 });
 
-// delete_process 핸들러는 비밀번호가 올바른지 확인합니다.
-router.post('/delete_auth_process',function(req,res){
+// delete_auth_process 핸들러는 비밀번호가 올바른지 확인합니다.
+router.post('/delete_auth_process', function(req, res){
   var post = req.body;
+  console.log(post);
   var password = post.password;
   var post_id = post.post_id;
-  db.query(`SELECT post_password FROM post WHERE post_id=?`,[post_id],function(err,result,fields){
+  console.log(password);
+  console.log(post_id);
+  db.query(`SELECT post_password FROM post WHERE post_id=?`, [post_id], function(err, result, fields){
     if(err){
       throw err;
     }
-    if(result.length === 0 || password !== result[0].post_password){
-      // 비밀번호가 일치하지 않으면 게시물 페이지로 리디렉션
-      req.flash('error', '비밀번호가 틀렸습니다.');
-      res.redirect(`/topic/${post_id}`);
+    console.log(result[0]);
+    if(!password){ // 비밀번호 미입력시 입력 요청
+      res.json({ error: '비밀번호를 입력하시오.' });
+    }
+    else if(result.length === 0 || password != result[0].post_password){
+      // 비밀번호가 틀렸으면 클라이언트에 에러 전송
+      res.json({ error: '비밀번호가 틀렸습니다.' });
     } else {
       // 비밀번호가 일치하면 게시물 삭제
-      db.query(`DELETE FROM post WHERE post_id=?`,[post_id],function(err,result,fields){
+      db.query(`DELETE FROM post WHERE post_id=?`, [post_id], function(err, result, fields){
         if(err){
           throw err;
         }
-        res.redirect('/');
+        res.json({ success: '게시물이 삭제되었습니다.' });
       });
     }
   });
 });
+
 
 router.post('/delete_process',function(req,res){
   var post = req.body;
