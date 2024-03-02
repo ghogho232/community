@@ -2,19 +2,20 @@ link(rel="stylesheet", href="/style.css")
 h1
   a(href="/") 홈
 h2 회원가입
-form(action="/auth/register_process", method="post")
+form#register-form(action="/auth/register_process", method="post")
   p
-    input#id(type="text", name="user_id", placeholder="아이디")
+    input#id(type="text", name="user_id", placeholder="아이디" required)
     input#id_check(type="button", value="중복확인")
+    span#duplicated_check  중복확인이 필요합니다.
   p
     #id_duplicated 이미 존재하는 아이디 입니다.
     #id_usable 사용 가능한 아이디 입니다.
   p
-    input(type="password", name="password", placeholder="비밀번호")
+    input(type="password", name="password", placeholder="비밀번호" required)
   p
-    input(type="password", name="password_check", placeholder="비밀번호 확인")
+    input(type="password", name="password_check", placeholder="비밀번호 확인" required)
   p
-    input(type="text", name="name", placeholder="닉네임")
+    input(type="text", name="name", placeholder="닉네임" required)
   p
     input(type="submit", value="가입")
 script(src="/register.js")

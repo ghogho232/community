@@ -85,8 +85,10 @@ router.post('/register_process', function(req,res){
             if(err){
                 throw err;
             }
-            
-            if(results.length <= 0 && password == password_check){
+            if(results.length > 0){
+                res.send(`이미 존재하는 아이디입니다.`);
+            }
+            else if(results.length <= 0 && password == password_check){
                 db.query(`INSERT INTO user (name,password,created,user_id) VALUES (?,?,?,?)`,
                 [name,password,new Date(),id],function(err,data){
                     if(err){

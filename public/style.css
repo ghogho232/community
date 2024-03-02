@@ -28,3 +28,6 @@ table {
 #id_usable{
   color: red; display: none;
 }
+#duplicated_check{
+  color: red; display: none;
+}
