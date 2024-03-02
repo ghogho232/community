@@ -22,3 +22,9 @@ table {
 #password-empty{
   color: red; display: none;
 }
+#id_duplicated{
+  color: red; display: none;
+}
+#id_usable{
+  color: red; display: none;
+}

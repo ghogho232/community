@@ -1,8 +1,12 @@
 var express = require('express');
+const app = express();
 var router = express.Router();
 var db = require('../../db');
 var template = require('../../lib/template');
 var auth = require('../../lib/auth_check');
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.json());
 
 router.get('/login', function(req,res){
     var title = "로그인";
@@ -48,24 +52,26 @@ router.post('/login_process', async function(req,res){
         //비밀번호를 입력하세요
     }
 });
-var title = "회원가입";
-var html = `
-    <h1><a href ="/">홈</a></h1>
-    <h2>회원가입</h2>
-    <form action="/auth/register_process" method="post">
-    <p><input type="text" name="user_id" placeholder="아이디">
-    <input type="button" value="중복확인">
-    </p>
-    <p><input type="password" name="password" placeholder="비밀번호"></p>
-    <p><input type="password" name="password_check" placeholder="비밀번호 확인"></p>
-    <p><input type="text" name="name" placeholder="닉네임">
-    <p><input type="submit" value="가입"><p>
-    </form>
-`;
+
 router.get('/register',function(req,res){
-    res.send(html);
+    res.render('register');
 });
 
+router.post('/id_check',function(req,res){
+    var post = req.body;
+    var id = post.id;
+    db.query(`SELECT user_id FROM user WHERE user_id = ?`,[id],function(err,result,fields){
+        if(err){
+            throw err;
+        }
+        if(result.length > 0){
+            res.json({ error: '아이디 중복' });
+        }
+        else{
+            res.json({success:'사용가능'});
+        }
+    });
+});
 router.post('/register_process', function(req,res){
     var post = req.body;
     var id = post.user_id;
@@ -79,9 +85,8 @@ router.post('/register_process', function(req,res){
             if(err){
                 throw err;
             }
-            if(results.length > 0){
-                res.send(html+`이미 존재하는 아이디입니다.`);
-            }else if(results.length <= 0 && password == password_check){
+            
+            if(results.length <= 0 && password == password_check){
                 db.query(`INSERT INTO user (name,password,created,user_id) VALUES (?,?,?,?)`,
                 [name,password,new Date(),id],function(err,data){
                     if(err){
