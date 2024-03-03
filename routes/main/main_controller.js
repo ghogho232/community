@@ -21,6 +21,7 @@ exports.main = (req, res) => {
             `<h2>${title}</h2>${description}<br>`,
             `<a href="/topic/create">글쓰기</a>`,
             auth.statusUI(req, res)
+
         );
     
         res.send(html);

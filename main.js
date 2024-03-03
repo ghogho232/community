@@ -38,8 +38,9 @@ app.set('view engine' , 'pug');
 var router = require('./routes');
 var authRouter = require('./routes/login/auth');
 var topicRouter = require('./routes/topic/topic');
+var commentRouter = require('./routes/comment/comment');
 app.use('/',router);
 app.use('/auth', authRouter);
 app.use('/topic', topicRouter);
-
+app.use('/comment', commentRouter);
 app.listen(3300, '0.0.0.0',() => { console.log('Server is running on port 3300');});

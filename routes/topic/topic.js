@@ -20,17 +20,18 @@ router.get('/create', function(req,res){
     var html = template.HTML(title, list, `
       <form action="/topic/anonym_create_process" method="post">
         <p><input type="hidden" name="ip" value="${ip}"></p>
-        <p><input type="text" name="title" placeholder="title"></p>
-        <p><input type="text" name="name" placeholder="name">
-            <input type="password" name="password" placeholder="password"></p>
+        <p><input type="text" name="title" placeholder="제목"></p>
+        <p><input type="text" name="name" placeholder="닉네임">
+            <input type="password" name="password" placeholder="비밀번호"></p>
         <p>
-          <textarea name="description" placeholder="description"></textarea>
+          <textarea name="description" placeholder="내용"></textarea>
         </p>
         <p>
           <input type="submit">
         </p>
       </form>
-    `, '',auth.statusUI(req,res));
+    `, '',auth.statusUI(req,res),``,``
+    );
     res.send(html);
   }
   else{ //로그인 글쓰기
@@ -46,7 +47,7 @@ router.get('/create', function(req,res){
           <input type="submit">
         </p>
       </form>
-    `, '',auth.statusUI(req,res));
+    `, '',auth.statusUI(req,res),``,``);
     res.send(html);  
   }
 });
@@ -106,7 +107,6 @@ router.get('/:pageId', function(req, res, next){
           var title = post[0].title;
           var author = post[0].author_name;
           var author_id = post[0].author_id;
-          console.log("아이디는" + author_id);
           var sanitizedTitle = sanitizeHtml(title);
           var sanitizedDescription = sanitizeHtml(post[0].contents, {
           allowedTags:['h1']
@@ -121,60 +121,91 @@ router.get('/:pageId', function(req, res, next){
           var minutes = ('0' + post_created.getMinutes()).slice(-2);
           var time = hours + ':' + minutes; 
 
-          if(author_id===1){ //익명글 출력
-            console.log('익명');
-            db.query(`SELECT * FROM post`, function (err, result2, fields) {
-              var list = template.list(result2);
-              var html = template.HTML(sanitizedTitle, list,
-              `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
-              ${date} ${time}
-              <p>${sanitizedDescription}</p>`,
-              ` <a href="/topic/create">글쓰기</a>
-                  <a href="/topic/update_auth/${post[0].post_id}">수정</a>
-                  <form action="/topic/delete_auth" method="post">
-                    <input type="hidden" name="post_id" value="${filteredId}">
-                    <input type="hidden" name="title" value="${sanitizedTitle}">
-                    <input type="submit" value="삭제">
-                  </form>`,
-                  auth.statusUI(req,res)
-              );
-              res.send(html);  
-            });
-          }
+          db.query(`SELECT * FROM comment WHERE post_id=?`,[filteredId],function(err,result3,fields){
+            var comments = template.comment(result3);
 
-          else if(!auth.isOwner(req,res)||auth.Owner(req,res)!=author_id){ //자신이 쓴 글이 아니면 글 제어 인터페이스 미출력
-            db.query(`SELECT * FROM post`, function (err, result2, fields) {
-              var list = template.list(result2);
-              var html = template.HTML(sanitizedTitle, list,
-              `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
+            if(author_id===1){ //익명글 출력
+              db.query(`SELECT * FROM post`, function (err, result2, fields) {
+                var list = template.list(result2);
+                var html = template.HTML(sanitizedTitle, list,
+                `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
                 ${date} ${time}
-               <p>${sanitizedDescription}</p>`,
-              `<a href="/topic/create">글쓰기</a>`,
-                  auth.statusUI(req,res)
-              );
-              res.send(html);  
-            });
-          }
+                <p>${sanitizedDescription}</p>`,
+                ` <a href="/topic/create">글쓰기</a>
+                    <a href="/topic/update_auth/${post[0].post_id}">수정</a>
+                    <form action="/topic/delete_auth" method="post">
+                      <input type="hidden" name="post_id" value="${filteredId}">
+                      <input type="hidden" name="title" value="${sanitizedTitle}">
+                      <input type="submit" value="삭제">
+                    </form>`,
+                    auth.statusUI(req,res),
+                `
+                <h4>댓글</h4> 
+                  ${comments}
+                  <br>
+                  <hr>
+                  <br>
+                `,
+                `
+                <br>
+                <hr>
+                <form action="/comment/create_comment" method="post">
+                <input type="hidden" name="id" value="1">
+                <input type="hidden" name="post_id" value="${filteredId}">
+                <p><input type="text" name="nickname" placeholder="닉네임">
+                <input type="password" name="password" placeholder="비밀번호"></p>
+                <p>
+                  <textarea name="contents" placeholder="댓글입력"></textarea>
+                </p>
+                <p>
+                  <input type="submit" value="등록">
+                </p>
+                </form>
+                `
+  
+                );
+                res.send(html);  
+              });
+            }
+  
+            else if(!auth.isOwner(req,res)||auth.Owner(req,res)!=author_id){ //자신이 쓴 글이 아니면 글 제어 인터페이스 미출력
+              db.query(`SELECT * FROM post`, function (err, result2, fields) {
+                var list = template.list(result2);
+                var html = template.HTML(sanitizedTitle, list,
+                `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
+                  ${date} ${time}
+                 <p>${sanitizedDescription}</p>`,
+                `<a href="/topic/create">글쓰기</a>`,
+                    auth.statusUI(req,res)
+                );
+                res.send(html);  
+              });
+            }
+            
+            else{ //자신이 쓴 글이면 제어 가능
+              db.query(`SELECT * FROM post`, function (err, result2, fields) {
+                var list = template.list(result2);
+                var html = template.HTML(sanitizedTitle, list,
+                `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
+                ${date} ${time}
+                <p>${sanitizedDescription}</p>`,
+                ` <a href="/topic/create">글쓰기</a>
+                    <a href="/topic/update/${post[0].post_id}">수정</a>
+                    <form action="/topic/delete_process" method="post">
+                      <input type="hidden" name="post_id" value="${filteredId}">
+                      <input type="hidden" name="title" value="${sanitizedTitle}">
+                      <input type="submit" value="삭제">
+                    </form>`,
+                    auth.statusUI(req,res),
+                    ``,``
+                );
+                res.send(html);  
+              });
+            }        
+          });
+
           
-          else{ //자신이 쓴 글이면 제어 가능
-            db.query(`SELECT * FROM post`, function (err, result2, fields) {
-              var list = template.list(result2);
-              var html = template.HTML(sanitizedTitle, list,
-              `<div class="post"><h2>${sanitizedTitle}</h2> by ${author}</div>
-              ${date} ${time}
-              <p>${sanitizedDescription}</p>`,
-              ` <a href="/topic/create">글쓰기</a>
-                  <a href="/topic/update/${post[0].post_id}">수정</a>
-                  <form action="/topic/delete_process" method="post">
-                    <input type="hidden" name="post_id" value="${filteredId}">
-                    <input type="hidden" name="title" value="${sanitizedTitle}">
-                    <input type="submit" value="삭제">
-                  </form>`,
-                  auth.statusUI(req,res)
-              );
-              res.send(html);  
-            });
-          }         
+           
       }
   });
 });
@@ -230,6 +261,42 @@ router.post('/delete_process',function(req,res){
   });
 });
 
+router.get('/update_auth/:pageId', function(req, res) {
+  var filteredId = path.parse(req.params.pageId).base;
+  db.query(`SELECT * FROM post WHERE post_id=?`, [filteredId], function(err, result, fields) {
+    if (err) {
+      next(err);
+    } else {
+      var post = result;
+      var title = post[0].title;
+      var author = post[0].author_name;
+      var author_id = post[0].author_id;
+      var sanitizedTitle = sanitizeHtml(title);
+      var sanitizedDescription = sanitizeHtml(post[0].contents, {
+        allowedTags: ['h1']
+      });
+      var html = template.HTML(title, '',
+        `
+          <form action="/topic/update_process" method="post">
+            <input type="hidden" name="post_id" value="${filteredId}">
+            <p><input type="text" name="title" placeholder="title" value="${sanitizedTitle}"></p>
+            <p>
+              <textarea name="description" placeholder="description">${sanitizedDescription}</textarea>
+            </p>
+            <p>
+              <input type="submit"  value="수정">
+          </p>
+        </form>
+        `,
+        ``,
+        auth.statusUI(req, res),
+        ``,``
+      );
+      res.send(html);
+    }
+  });
+});
+
 router.get('/update/:pageId', function(req, res) {
   var filteredId = path.parse(req.params.pageId).base;
   db.query(`SELECT * FROM post WHERE post_id=?`, [filteredId], function(err, result, fields) {
@@ -258,7 +325,8 @@ router.get('/update/:pageId', function(req, res) {
         </form>
         `,
         ``,
-        auth.statusUI(req, res)
+        auth.statusUI(req, res),
+        ``,``
       );
       res.send(html);
     }
@@ -277,4 +345,6 @@ router.post('/update_process',function async (req,res){
     res.redirect('/');
   });
 });
+
+
 module.exports = router;

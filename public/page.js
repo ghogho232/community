@@ -1,0 +1,1 @@
+var auth = require('../lib/auth_check');

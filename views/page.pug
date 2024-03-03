@@ -1,0 +1,28 @@
+
+
+//- 템플릿 레이아웃을 생성
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Post Details
+    link(rel="stylesheet", href="/styles.css")
+    
+  body
+    //- 게시물 정보 출력
+    .post
+      h2= sanitizedTitle
+      |  by #{author}
+      p= date
+      p= time
+      p= sanitizedDescription
+    //- 게시물 관리 링크
+    a(href="/topic/create") 글쓰기
+    a(href=`/topic/update_auth/${post.post_id}`) 수정
+    form(action="/topic/delete_auth", method="post")
+      input(type="hidden", name="post_id", value=post.post_id)
+      input(type="hidden", name="title", value=sanitizedTitle)
+      input(type="submit", value="삭제")
+    //- 사용자 인증 상태 UI
+    
