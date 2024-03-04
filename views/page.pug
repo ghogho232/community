@@ -1,28 +1,85 @@
-
-
-//- 템플릿 레이아웃을 생성
 doctype html
 html(lang="en")
   head
-    meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title Post Details
-    link(rel="stylesheet", href="/styles.css")
-    
+    title Login TEST - #{title}
+    link(rel="stylesheet", href="/style.css")
+    meta(charset="utf-8")
+    style.
+
   body
-    //- 게시물 정보 출력
-    .post
-      h2= sanitizedTitle
-      |  by #{author}
-      p= date
-      p= time
+    .background
+      h1
+        a(href="/") COMMUNITY
+      p= authStatusUI
+
+      a(href="/topic/create") 글쓰기
+      a(href=`/topic/update_auth/${filteredId}`) 수정
+      form(action="/topic/delete_auth", method="post")
+        input(type="hidden", name="post_id", value=filteredId)
+        input(type="hidden", name="title", value=sanitizedTitle)
+        input(type="submit", value="삭제")
+
+      .post
+        h2= sanitizedTitle
+        | by #{author}
+      p= date + ' ' + time
       p= sanitizedDescription
-    //- 게시물 관리 링크
-    a(href="/topic/create") 글쓰기
-    a(href=`/topic/update_auth/${post.post_id}`) 수정
-    form(action="/topic/delete_auth", method="post")
-      input(type="hidden", name="post_id", value=post.post_id)
-      input(type="hidden", name="title", value=sanitizedTitle)
-      input(type="submit", value="삭제")
-    //- 사용자 인증 상태 UI
-    
+
+      br
+      hr
+      form(action="/comment/create_comment", method="post")
+        input(type="hidden", name="id", value="1")
+        input(type="hidden", name="post_id", value=filteredId)
+        p
+          input(type="text", name="nickname", placeholder="닉네임", required)
+          input(type="password", name="password", placeholder="비밀번호", required)
+        p
+          textarea(name="contents", placeholder="댓글입력", required)
+        p
+          input(type="submit", value="등록")
+
+      h4 댓글
+      br 
+      table
+        thead
+          tr
+            th 작성자
+            th 내용
+            th 작성일
+            th
+        tbody
+          each comment in comments
+            - var comment_created = comment.comment_created;
+            - var year = ('0' + (comment_created.getFullYear())).slice(-2);
+            - var month = ('0' + (comment_created.getMonth() + 1)).slice(-2);
+            - var day = ('0' + comment_created.getDate()).slice(-2);
+            - var date = year + '-' + month  + '-' + day;
+            - var hours = ('0' + comment_created.getHours()).slice(-2); 
+            - var minutes = ('0' + comment_created.getMinutes()).slice(-2);
+            - var time = hours + ':' + minutes;
+            tr
+              td= comment.author_name
+              td= comment.contents
+              td= `${date} ${time}`
+              td
+                form(action="/comment/delete_comment", method="post")
+                  input(type="hidden", name="post_id", value=comment.post_id)
+                  input(type="hidden", name="comment_id", value=comment.comment_id)
+                  input(type="submit", value="삭제")
+      br
+      hr
+      br
+
+      table
+        thead
+          tr
+            th 제목
+            th 작성자
+            th 작성일
+        tbody
+          each post in posts
+            tr
+              td
+                a(href=`/topic/${post.post_id}`)= post.title
+              td= post.author_name
+              td= post.post_created.toISOString().substring(0, 16).replace("T", " ")

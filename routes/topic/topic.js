@@ -120,7 +120,7 @@ router.get('/:pageId', function(req, res, next){
           var hours = ('0' + post_created.getHours()).slice(-2); 
           var minutes = ('0' + post_created.getMinutes()).slice(-2);
           var time = hours + ':' + minutes; 
-
+          var written_time = date + ' ' + time;
           db.query(`SELECT * FROM comment WHERE post_id=?`,[filteredId],function(err,result3,fields){
             var comments = template.comment(result3);
 
@@ -152,10 +152,10 @@ router.get('/:pageId', function(req, res, next){
                 <form action="/comment/create_comment" method="post">
                 <input type="hidden" name="id" value="1">
                 <input type="hidden" name="post_id" value="${filteredId}">
-                <p><input type="text" name="nickname" placeholder="닉네임">
-                <input type="password" name="password" placeholder="비밀번호"></p>
+                <p><input type="text" name="nickname" placeholder="닉네임" required>
+                <input type="password" name="password" placeholder="비밀번호" required></p>
                 <p>
-                  <textarea name="contents" placeholder="댓글입력"></textarea>
+                  <textarea name="contents" placeholder="댓글입력" required></textarea>
                 </p>
                 <p>
                   <input type="submit" value="등록">
@@ -164,7 +164,16 @@ router.get('/:pageId', function(req, res, next){
                 `
   
                 );
-                res.send(html);  
+                res.send(html);
+                // res.render('page',{
+                //   filteredId : filteredId,
+                //   sanitizedTitle : sanitizedTitle,
+                //   author : author,
+                //   date : date, time : time,
+                //   sanitizedDescription : sanitizedDescription,
+                //   comments : result3,
+                //   posts : result2
+                // });  
               });
             }
   
@@ -176,7 +185,30 @@ router.get('/:pageId', function(req, res, next){
                   ${date} ${time}
                  <p>${sanitizedDescription}</p>`,
                 `<a href="/topic/create">글쓰기</a>`,
-                    auth.statusUI(req,res)
+                    auth.statusUI(req,res),
+                    `
+                <h4>댓글</h4> 
+                  ${comments}
+                  <br>
+                  <hr>
+                  <br>
+                `,
+                `
+                <br>
+                <hr>
+                <form action="/comment/create_comment" method="post">
+                <input type="hidden" name="id" value="1">
+                <input type="hidden" name="post_id" value="${filteredId}">
+                <p><input type="text" name="nickname" placeholder="닉네임" required>
+                <input type="password" name="password" placeholder="비밀번호" required></p>
+                <p>
+                  <textarea name="contents" placeholder="댓글입력" required></textarea>
+                </p>
+                <p>
+                  <input type="submit" value="등록">
+                </p>
+                </form>
+                `
                 );
                 res.send(html);  
               });
@@ -197,7 +229,29 @@ router.get('/:pageId', function(req, res, next){
                       <input type="submit" value="삭제">
                     </form>`,
                     auth.statusUI(req,res),
-                    ``,``
+                    `
+                <h4>댓글</h4> 
+                  ${comments}
+                  <br>
+                  <hr>
+                  <br>
+                `,
+                `
+                <br>
+                <hr>
+                <form action="/comment/create_comment" method="post">
+                <input type="hidden" name="id" value="1">
+                <input type="hidden" name="post_id" value="${filteredId}">
+                <p><input type="text" name="nickname" placeholder="닉네임" required>
+                <input type="password" name="password" placeholder="비밀번호" required></p>
+                <p>
+                  <textarea name="contents" placeholder="댓글입력" required></textarea>
+                </p>
+                <p>
+                  <input type="submit" value="등록">
+                </p>
+                </form>
+                `
                 );
                 res.send(html);  
               });

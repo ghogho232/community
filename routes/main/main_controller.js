@@ -20,7 +20,8 @@ exports.main = (req, res) => {
         var html = template.HTML(title, list,
             `<h2>${title}</h2>${description}<br>`,
             `<a href="/topic/create">글쓰기</a>`,
-            auth.statusUI(req, res)
+            auth.statusUI(req, res),
+            '',''
 
         );
     

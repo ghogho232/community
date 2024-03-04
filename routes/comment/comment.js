@@ -28,4 +28,15 @@ router.post('/create_comment',function(req,res){
     });
 });
 
+router.post('/delete_comment',function(req,res){
+    var post = req.body;
+    var comment_id = post.comment_id;
+    var post_id = post.post_id;
+    db.query(`DELETE FROM comment WHERE comment_id=?`, [comment_id], function(err, result, fields){
+        if(err){
+          throw err;
+        }
+        res.redirect(`/topic/${post_id}`);
+      });
+})
 module.exports = router;
