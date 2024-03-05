@@ -63,7 +63,6 @@ router.post('/create_process', async function(req,res){
       throw err;
     }
     var user_id = result[0].id;
-    console.log(user_id);
     db.query(`INSERT INTO post (title,contents,post_created,author_id,author_name) VALUES (?,?,?,?,?)`,
             [title,desc,new Date(),user_id,nickname],function(err,results){
       if(err){
@@ -150,16 +149,16 @@ router.get('/:pageId', function(req, res, next){
                 <br>
                 <hr>
                 <form action="/comment/create_comment" method="post">
-                <input type="hidden" name="id" value="1">
-                <input type="hidden" name="post_id" value="${filteredId}">
-                <p><input type="text" name="nickname" placeholder="닉네임" required>
-                <input type="password" name="password" placeholder="비밀번호" required></p>
-                <p>
-                  <textarea name="contents" placeholder="댓글입력" required></textarea>
-                </p>
-                <p>
-                  <input type="submit" value="등록">
-                </p>
+                  <input type="hidden" name="id" value="1">
+                  <input type="hidden" name="post_id" value="${filteredId}">
+                  <p><input type="text" name="nickname" placeholder="닉네임" required>
+                  <input type="password" name="password" placeholder="비밀번호" required></p>
+                  <p>
+                    <textarea name="contents" placeholder="댓글입력" required></textarea>
+                  </p>
+                  <p>
+                    <input type="submit" value="등록">
+                  </p>
                 </form>
                 `
   
@@ -197,16 +196,16 @@ router.get('/:pageId', function(req, res, next){
                 <br>
                 <hr>
                 <form action="/comment/create_comment" method="post">
-                <input type="hidden" name="id" value="1">
-                <input type="hidden" name="post_id" value="${filteredId}">
-                <p><input type="text" name="nickname" placeholder="닉네임" required>
-                <input type="password" name="password" placeholder="비밀번호" required></p>
-                <p>
-                  <textarea name="contents" placeholder="댓글입력" required></textarea>
-                </p>
-                <p>
-                  <input type="submit" value="등록">
-                </p>
+                  <input type="hidden" name="id" value="1">
+                  <input type="hidden" name="post_id" value="${filteredId}">
+                  <p><input type="text" name="nickname" placeholder="닉네임" required>
+                  <input type="password" name="password" placeholder="비밀번호" required></p>
+                  <p>
+                    <textarea name="contents" placeholder="댓글입력" required></textarea>
+                  </p>
+                  <p>
+                    <input type="submit" value="등록">
+                  </p>
                 </form>
                 `
                 );
@@ -240,16 +239,16 @@ router.get('/:pageId', function(req, res, next){
                 <br>
                 <hr>
                 <form action="/comment/create_comment" method="post">
-                <input type="hidden" name="id" value="1">
-                <input type="hidden" name="post_id" value="${filteredId}">
-                <p><input type="text" name="nickname" placeholder="닉네임" required>
-                <input type="password" name="password" placeholder="비밀번호" required></p>
-                <p>
-                  <textarea name="contents" placeholder="댓글입력" required></textarea>
-                </p>
-                <p>
-                  <input type="submit" value="등록">
-                </p>
+                  <input type="hidden" name="id" value="1">
+                  <input type="hidden" name="post_id" value="${filteredId}">
+                  <p><input type="text" name="nickname" placeholder="닉네임" required>
+                  <input type="password" name="password" placeholder="비밀번호" required></p>
+                  <p>
+                    <textarea name="contents" placeholder="댓글입력" required></textarea>
+                  </p>
+                  <p>
+                    <input type="submit" value="등록">
+                  </p>
                 </form>
                 `
                 );
@@ -274,16 +273,12 @@ router.post('/delete_auth', function(req, res){
 // delete_auth_process 핸들러는 비밀번호가 올바른지 확인합니다.
 router.post('/delete_auth_process', function(req, res){
   var post = req.body;
-  console.log(post);
   var password = post.password;
   var post_id = post.post_id;
-  console.log(password);
-  console.log(post_id);
   db.query(`SELECT post_password FROM post WHERE post_id=?`, [post_id], function(err, result, fields){
     if(err){
       throw err;
     }
-    console.log(result[0]);
     if(!password){ // 비밀번호 미입력시 입력 요청
       res.json({ error: '비밀번호를 입력하시오.' });
     }
@@ -306,7 +301,6 @@ router.post('/delete_auth_process', function(req, res){
 router.post('/delete_process',function(req,res){
   var post = req.body;
   var post_id = post.post_id;
-  console.log(post_id);
   db.query(`DELETE FROM post WHERE post_id=?`,[post_id],function(err,result,fields){
     if(err){
       throw err;

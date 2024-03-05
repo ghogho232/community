@@ -3,7 +3,6 @@ let isIdChecked = false; // 중복확인 버튼이 눌렸는지 여부
 document.getElementById('id_check').addEventListener('click', function(event) {
     event.preventDefault(); // 폼 기본 동작 중단
     var id = document.getElementById('id').value;
-    console.log("포스트아이디"+id);
 
     // 서버로 비밀번호와 ID 전송
     fetch('/auth/id_check', {
