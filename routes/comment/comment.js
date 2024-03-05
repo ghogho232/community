@@ -28,7 +28,7 @@ router.post('/create_comment',function(req,res){
     });
 });
 
-router.post('/delete_comment',function(req,res){
+router.post('/delete_anony_comment',function(req,res){
     var post = req.body;
     var comment_id = post.comment_id;
     var password = post.password;
@@ -49,21 +49,26 @@ router.post('/delete_comment',function(req,res){
             if(err){
               throw err;
             }
-            res.json({ success: '게시물이 삭제되었습니다.' });
+            res.json({ success: '댓글이 삭제되었습니다.' });
           });
         }
       });
 });
 
-router.post('/delete_comment_process',function(req,res){
+router.post('/delete_comment',function(req,res){
     var post = req.body;
     var comment_id = post.comment_id;
-    var post_id = post.post_id;
-    db.query(`DELETE FROM comment WHERE comment_id=?`, [comment_id], function(err, result, fields){
-        if(err){
-          throw err;
-        }
-        // res.redirect(`/topic/${post_id}`);
-      });
-})
+    var author_id = post.author_id;
+    if(req.session.user_id == author_id){
+        db.query(`DELETE FROM comment WHERE comment_id=?`, [comment_id], function(err, result, fields){
+            if(err){
+              throw err;
+            }
+            res.json({ success: '게시물이 삭제되었습니다' });
+          });
+    }
+    else{
+        res.json({error: '게시물을 지울 수 없습니다'});
+    }
+});
 module.exports = router;

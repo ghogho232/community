@@ -97,6 +97,7 @@ router.post('/anonym_create_process', async function(req,res){ //익명 글쓰�
 
 router.get('/:pageId', function(req, res, next){
   var filteredId = path.parse(req.params.pageId).base;
+  console.log(req.session.user_id);
   db.query(`SELECT * FROM post WHERE post_id=?`,[filteredId],function(err,result,fields){
       if(err){
           next(err);
@@ -122,6 +123,40 @@ router.get('/:pageId', function(req, res, next){
           var written_time = date + ' ' + time;
           db.query(`SELECT * FROM comment WHERE post_id=?`,[filteredId],function(err,result3,fields){
             var comments = template.comment(result3);
+            var commentControl
+            if(!auth.isOwner(req,res)){
+              commentControl = `               
+              <br>
+              <hr>
+              <form action="/comment/create_comment" method="post">
+                <input type="hidden" name="id" value="1">
+                <input type="hidden" name="post_id" value="${filteredId}">
+                <p><input type="text" name="nickname" placeholder="닉네임" required>
+                <input type="password" name="password" placeholder="비밀번호" required></p>
+                <p>
+                  <textarea name="contents" placeholder="댓글입력" required></textarea>
+                </p>
+                <p>
+                  <input type="submit" value="등록">
+                </p>
+              </form>`
+            }else{
+              commentControl = `               
+              <br>
+              <hr>
+              <form action="/comment/create_comment" method="post">
+                <input type="hidden" name="id" value=${req.session.user_id}>
+                <input type="hidden" name="post_id" value="${filteredId}">
+                <p><input type="text" name="nickname" value=${req.session.nickname} readonly required>
+                <p>
+                  <textarea name="contents" placeholder="댓글입력" required></textarea>
+                </p>
+                <p>
+                  <input type="submit" value="등록">
+                </p>
+              </form>`
+            }
+            
 
             if(author_id===1){ //익명글 출력
               db.query(`SELECT * FROM post`, function (err, result2, fields) {
@@ -145,22 +180,7 @@ router.get('/:pageId', function(req, res, next){
                   <hr>
                   <br>
                 `,
-                `
-                <br>
-                <hr>
-                <form action="/comment/create_comment" method="post">
-                  <input type="hidden" name="id" value="1">
-                  <input type="hidden" name="post_id" value="${filteredId}">
-                  <p><input type="text" name="nickname" placeholder="닉네임" required>
-                  <input type="password" name="password" placeholder="비밀번호" required></p>
-                  <p>
-                    <textarea name="contents" placeholder="댓글입력" required></textarea>
-                  </p>
-                  <p>
-                    <input type="submit" value="등록">
-                  </p>
-                </form>
-                `
+                commentControl
   
                 );
                 res.send(html);
@@ -192,22 +212,7 @@ router.get('/:pageId', function(req, res, next){
                   <hr>
                   <br>
                 `,
-                `
-                <br>
-                <hr>
-                <form action="/comment/create_comment" method="post">
-                  <input type="hidden" name="id" value="1">
-                  <input type="hidden" name="post_id" value="${filteredId}">
-                  <p><input type="text" name="nickname" placeholder="닉네임" required>
-                  <input type="password" name="password" placeholder="비밀번호" required></p>
-                  <p>
-                    <textarea name="contents" placeholder="댓글입력" required></textarea>
-                  </p>
-                  <p>
-                    <input type="submit" value="등록">
-                  </p>
-                </form>
-                `
+                  commentControl
                 );
                 res.send(html);  
               });
@@ -235,22 +240,7 @@ router.get('/:pageId', function(req, res, next){
                   <hr>
                   <br>
                 `,
-                `
-                <br>
-                <hr>
-                <form action="/comment/create_comment" method="post">
-                  <input type="hidden" name="id" value="1">
-                  <input type="hidden" name="post_id" value="${filteredId}">
-                  <p><input type="text" name="nickname" placeholder="닉네임" required>
-                  <input type="password" name="password" placeholder="비밀번호" required></p>
-                  <p>
-                    <textarea name="contents" placeholder="댓글입력" required></textarea>
-                  </p>
-                  <p>
-                    <input type="submit" value="등록">
-                  </p>
-                </form>
-                `
+                commentControl
                 );
                 res.send(html);  
               });
