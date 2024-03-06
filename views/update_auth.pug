@@ -1,0 +1,12 @@
+link(rel="stylesheet", href="/style.css")
+
+form#delete-form(action="/topic/update_auth_process", method="post")
+  p 수정을 위해 비밀번호를 입력하세요.
+  input#id(type="hidden", name="id", value=post_id)
+  p
+    label(for="password") 비밀번호:
+    input#password(type="password", name="password", placeholder="비밀번호", required)
+    button#update_auth_submit(type="submit") 확인
+    #password-error 비밀번호가 틀렸습니다.
+    #password-empty 비밀번호를 입력하세요.
+script(src="/update_auth.js")

@@ -11,7 +11,9 @@ var FileStore = require('session-file-store')(session);
 var cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 var sessionMiddleware = require('./session_control');
+//const urlCheck = require('./lib/Url_check');
 
+//app.use(urlCheck.restrictUrlAccess);
 app.use(helmet());
 app.use((req, res, next) => {
   res.locals.cspNonce = crypto.randomBytes(16).toString("hex");

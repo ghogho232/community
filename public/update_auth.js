@@ -1,4 +1,4 @@
-document.getElementById('submit-btn').addEventListener('click', function(event) {
+document.getElementById('update_auth_submit').addEventListener('click', function(event) {
     event.preventDefault(); // 폼 기본 동작 중단
 
     var password = document.getElementById('password').value;
@@ -6,7 +6,7 @@ document.getElementById('submit-btn').addEventListener('click', function(event) 
     console.log("포스트아이디"+post_id);
     console.log("포스트비밀번호"+password);
     // 서버로 비밀번호와 ID 전송
-    fetch('/topic/delete_auth_process', {
+    fetch('/topic/update_auth_process', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
@@ -29,7 +29,7 @@ document.getElementById('submit-btn').addEventListener('click', function(event) 
             document.getElementById('password-empty').style.display = 'none'
             document.getElementById('password-error').style.display = 'inline'
         } else {
-            window.location.href = '/'; // 맞으면 홈으로
+            window.location.href = `/topic/update/${post_id}`; // 맞으면 홈으로
         }
     })
     .catch(error => {

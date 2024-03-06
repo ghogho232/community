@@ -32,26 +32,32 @@ router.post('/delete_anony_comment',function(req,res){
     var post = req.body;
     var comment_id = post.comment_id;
     var password = post.password;
+
     db.query(`SELECT password FROM comment WHERE comment_id=?`, [comment_id], function(err, result, fields){
         if(err){
           throw err;
         }
-        
-        if(!password){ // 비밀번호 미입력시 입력 요청
-          res.json({ error: '비밀번호를 입력하시오.' });
+        if(auth.isOwner(req,res)){
+            res.json({ error: '삭제할 수 없습니다' });
         }
-        else if(result.length === 0 || password != result[0].password){
-          // 비밀번호가 틀렸으면 클라이언트에 에러 전송
-          res.json({ error: '비밀번호가 틀렸습니다.' });
-        } else {
-          // 비밀번호가 일치하면 게시물 삭제
-          db.query(`DELETE FROM comment WHERE comment_id=?`, [comment_id], function(err, result, fields){
-            if(err){
-              throw err;
+        else{
+            if(!password){ // 비밀번호 미입력시 입력 요청
+                res.json({ error: '비밀번호를 입력하시오.' });
+              }
+              else if(result.length === 0 || password != result[0].password){
+                // 비밀번호가 틀렸으면 클라이언트에 에러 전송
+                res.json({ error: '비밀번호가 틀렸습니다.' });
+              } else {
+                // 비밀번호가 일치하면 게시물 삭제
+                db.query(`DELETE FROM comment WHERE comment_id=?`, [comment_id], function(err, result, fields){
+                  if(err){
+                    throw err;
+                  }
+                  res.json({ success: '댓글이 삭제되었습니다.' });
+                });
+              } 
             }
-            res.json({ success: '댓글이 삭제되었습니다.' });
-          });
-        }
+
       });
 });
 
