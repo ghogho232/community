@@ -168,7 +168,7 @@ router.post('/update_auth_process', function(req,res){
       res.json({ error: '비밀번호가 틀렸습니다.' });
     } else {
       // 비밀번호가 일치하면 게시물 수정
-        
+        req.session.can_update = true;
         res.json({ success: '' });
 
     }
@@ -176,6 +176,9 @@ router.post('/update_auth_process', function(req,res){
 });
 
 router.get('/update/:pageId', function(req, res) {
+  if(!req.session.can_update){
+    res.redirect('/');
+  }
   var filteredId = path.parse(req.params.pageId).base;
   db.query(`SELECT * FROM post WHERE post_id=?`, [filteredId], function(err, result, fields) {
     if (err) {
@@ -220,7 +223,10 @@ router.post('/update_process',function async (req,res){
     if(err){
       throw err;
     }
-    res.redirect(`${post_id}`);
+    req.session.destroy(function(err){
+      res.redirect(`${post_id}`);
+  });
+    
   });
 });
 
