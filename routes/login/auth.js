@@ -19,8 +19,8 @@ router.get('/login', function(req,res){
             <h1><a href ="/">홈</a></h1>
             <h2>로그인</h2>
             <form action="/auth/login_process" method="post">
-            <p><input type="text" name="user_id" placeholder="아이디"></p>
-            <p><input type="password" name="password" placeholder="비밀번호"></p>
+            <p><input type="text" name="user_id" placeholder="아이디" required></p>
+            <p><input type="password" name="password" placeholder="비밀번호" required></p>
             <p><input type="submit" value="로그인"><p>
             </form>
             <p><a href="/auth/register">회원가입</a></p>` 

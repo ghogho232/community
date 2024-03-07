@@ -167,7 +167,7 @@ router.post('/update_auth_process', function(req,res){
       // 비밀번호가 틀렸으면 클라이언트에 에러 전송
       res.json({ error: '비밀번호가 틀렸습니다.' });
     } else {
-      // 비밀번호가 일치하면 게시물 수정
+      // 비밀번호가 일치하면 게시물 수정 가능
         req.session.can_update = true;
         res.json({ success: '' });
 
@@ -176,14 +176,12 @@ router.post('/update_auth_process', function(req,res){
 });
 
 router.get('/update/:pageId', function(req, res) {
-  if(!req.session.can_update){
-    res.redirect('/');
-  }
   var filteredId = path.parse(req.params.pageId).base;
-  db.query(`SELECT * FROM post WHERE post_id=?`, [filteredId], function(err, result, fields) {
+  db.query(`SELECT * FROM post WHERE post_id=?`,[filteredId],function(err,result,fields){
     if (err) {
-      next(err);
-    } else {
+      throw(err);
+    }
+    if(result[0].author_id == req.session.user_id || req.session.can_update){ //해당글쓴이거나 익명글 비밀번호 맞았을 시 수정가능
       var post = result;
       var title = post[0].title;
       var author = post[0].author_name;
@@ -209,10 +207,18 @@ router.get('/update/:pageId', function(req, res) {
         auth.statusUI(req, res),
         ``,``
       );
-      res.send(html);
+      req.session.destroy(function(err){ //다른 글 수정 방지 위해 바로 수정 허가 세션 삭제
+        res.send(html);
+      });  
+      
     }
-  });
-});
+    else { //아니면 수정불가
+      res.redirect('/');
+    }
+    })
+  });  
+
+
 
 router.post('/update_process',function async (req,res){
   var post = req.body;
@@ -225,8 +231,7 @@ router.post('/update_process',function async (req,res){
     }
     req.session.destroy(function(err){
       res.redirect(`${post_id}`);
-  });
-    
+    });  
   });
 });
 
