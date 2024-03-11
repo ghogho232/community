@@ -7,7 +7,7 @@ for (var i = 0; i < deleteButtons.length; i++) {
         var author = this.closest('tr').querySelector('.author_id');
         var author_id = author.value;
 
-        if(author_id == 1){ //익명유저 댓글이면
+        if(author_id == 1){ //익명유저 댓글이면 
             // 클릭된 삭제 버튼의 부모 요소에서 클래스가 comment_pwd인거 찾기
             var passwordInput = this.closest('tr').querySelector('.comment_pwd');
             var password = passwordInput.value;
